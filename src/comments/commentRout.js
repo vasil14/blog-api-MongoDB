@@ -26,20 +26,4 @@ router.patch(
   commentController.comment_replyUpdate
 );
 
-// get all comments
-// router.get("/comments", async (req, res) => {
-//   try {
-//     const comments = await Comment.find({});
-//     res.send(comments);
-//   } catch (e) {
-//     res.status(500).send(e);
-//   }
-// });
-
-// router.get("/comments/:id", async (req, res) => {
-//   const comment = await Comment.findById(req.params.id);
-
-//   res.send(comment);
-// });
-
 module.exports = router;

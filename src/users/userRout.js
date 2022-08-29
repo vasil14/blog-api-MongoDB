@@ -27,12 +27,4 @@ router.delete("/users/me", auth, UserController.user_delete);
 // All user totaComments
 router.get("/users/totalComments", UserController.user_totalComments);
 
-// Get all posts of user
-// router.get("/users/me/posts", auth, async (req, res) => {
-//   const _id = req.user._id;
-
-//   const user = await User.findById(_id).populate("posts");
-//   res.send(user);
-// });
-
 module.exports = router;

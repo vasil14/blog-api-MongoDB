@@ -1,0 +1,42 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>blog</title>
+</head>
+
+<body>
+  <h1>Log In</h1>
+
+  <div id="status"></div>
+
+  <form id="signup-form">
+    <input placeholder="Name" id="name">
+    <input placeholder="Email" id="email1">
+    <input placeholder="Password" id="password1">
+    <button>Sign Up</button>
+  </form>
+
+  <form id="login-form" action="/blog">
+    <input placeholder="Email" id="email">
+    <input placeholder="Password" id="password">
+    <button>Login</button>
+  </form>
+
+  <form id="post-form" name="msg">
+    <input placeholder="Title" id="title">
+    <input placeholder="Body" id="body">
+    <button>Post</button>
+  </form>
+
+  <div id="post-list"></div>
+
+
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/blog.js"></script>
+</body>
+
+</html>

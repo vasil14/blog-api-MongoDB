@@ -8,6 +8,11 @@ const commentSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    autorName: {
+      type: mongoose.Schema.Types.String,
+      ref: "User",
+      required: true,
+    },
     postId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",

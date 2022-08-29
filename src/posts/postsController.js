@@ -2,10 +2,14 @@ const Post = require("../posts/postModel");
 
 // Create a new Post
 exports.post_create = async (req, res) => {
+  if (!req.body.title || !req.body.body) {
+    return res.status(400).send({ message: "Title and body Required!" });
+  }
   const post = new Post({
     title: req.body.title,
     body: req.body.body,
     autor: req.user._id,
+    autorName: req.user.name,
   });
   try {
     await post.save();
@@ -97,7 +101,7 @@ exports.post_postsCommentReplies = async (req, res) => {
       {
         $unwind: {
           path: "$comments",
-          preserveNullAndEmptyArrays: false,
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -122,18 +126,24 @@ exports.post_postsCommentReplies = async (req, res) => {
             title: "$title",
             body: "$body",
             autor: "$autor",
+            autorName: "$autorName",
             createdAt: "$createdAt",
             updatedAt: "$updatedAt",
             comments: {
               _id: "$comments._id",
               comment: "$comments.comment",
               autor: "$comments.autor",
+              autorName: "$comments.autorName",
               postId: "$comments.postId",
               createdAt: "$comments.createdAt",
               updatedAt: "$comments.updatedAt",
             },
           },
-          replies: { $push: "$reply" },
+          replies: {
+            $push: {
+              $cond: [{ $gt: ["$reply", 0] }, "$reply", "$$REMOVE"],
+            },
+          },
           replyCount: { $sum: 1 },
         },
       },
@@ -144,6 +154,7 @@ exports.post_postsCommentReplies = async (req, res) => {
           title: { $first: "$_id.title" },
           body: { $first: "$_id.body" },
           autor: { $first: "$_id.autor" },
+          autorName: { $first: "$_id.autorName" },
           createdAt: { $first: "$_id.createdAt" },
           updatedAt: { $first: "$_id.updatedAt" },
           commentCount: { $sum: 1 },
@@ -152,10 +163,17 @@ exports.post_postsCommentReplies = async (req, res) => {
               _id: "$_id.comments._id",
               comment: "$_id.comments.comment",
               autor: "$_id.comments.autor",
+              autorName: "$_id.comments.autorName",
               postId: "$_id.comments.postId",
               createdAt: "$_id.comments.createdAt",
               updatedAt: "$_id.comments.updatedAt",
-              replyCount: "$replyCount",
+              replyCount: {
+                $cond: {
+                  if: { $isArray: "$replies" },
+                  then: { $size: "$replies" },
+                  else: 0,
+                },
+              },
               reply: "$replies",
             },
           },
@@ -282,31 +300,6 @@ exports.post_totalComments10 = async (req, res) => {
           },
         },
       },
-      // {
-      //   $set: {
-      //     $map: {
-      //       input: "$comments",
-      //       as: "totalReplies",
-      //       in: { $sum: "$replyCount" },
-      //     },
-
-      //     // totalScore: { $add: ["$commentCount", { $size: "$comments.reply" }] },
-      //   },
-      // },
-      // {
-      //   $project: {
-      //     totalScore: {
-      //       $map: {
-      //         input: "$comments",
-      //         as: "totalReplies",
-      //         in: { $sum: "$replyCount" },
-      //       },
-      //     },
-      //     total: {
-      //       $add: ["$commentCount", 1],
-      //     },
-      //   },
-      // },
       { $sort: { totalComments: -1 } },
     ]);
 
@@ -328,7 +321,7 @@ exports.post_totalComments10 = async (req, res) => {
     });
 
     const postsMoreComments = mapped.filter((post) => {
-      return post.totalComments > 10;
+      return post.totalComments > 0;
     });
 
     if (!postsMoreComments) {

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const SECRETKEY = proces.env;
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -45,7 +46,7 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
 
-  const token = jwt.sign({ _id: user._id.toString() }, "thisisblogusertoken");
+  const token = jwt.sign({ _id: user._id.toString() }, SECRETKEY);
 
   user.tokens = user.tokens.concat({ token });
   await user.save();
@@ -63,6 +64,7 @@ userSchema.methods.toJSON = function () {
 
   return userObject;
 };
+
 // Create a new Model method (User.findByCredentials)
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });

@@ -2,15 +2,21 @@ const Comment = require("./commentModel");
 
 // Create a comment
 exports.comment_create = async (req, res) => {
+  if (!req.body.comment) {
+    return res.status(400).send({ message: "Comment is required!" });
+  }
+
   const _id = req.params.id;
 
   const createdComment = new Comment({
     comment: req.body.comment,
     autor: req.user._id,
+    autorName: req.user.name,
     postId: _id,
   });
   try {
     await createdComment.save();
+
     res.status(201).send(createdComment);
   } catch (e) {
     res.status(400).send();
@@ -19,6 +25,10 @@ exports.comment_create = async (req, res) => {
 
 // Create reply comment
 exports.comment_replyCreate = async (req, res) => {
+  if (!req.body.comment) {
+    return res.status(400).send({ message: "Reply is required!" });
+  }
+
   try {
     const commentFound = await Comment.findById(req.params.commentId);
 
@@ -28,6 +38,7 @@ exports.comment_replyCreate = async (req, res) => {
     const reply = new Comment({
       comment: req.body.comment,
       autor: req.user._id,
+      autorName: req.user.name,
       parentId: commentFound._id,
       postId: commentFound.postId,
     });

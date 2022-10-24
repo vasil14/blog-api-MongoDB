@@ -1,4 +1,4 @@
-const User = require("../users/userModel");
+const User = require('../users/userModel');
 
 // Create a new User
 exports.user_create = async (req, res) => {
@@ -20,7 +20,6 @@ exports.user_login = async (req, res) => {
       req.body.email,
       req.body.password
     );
-
     const token = await user.generateAuthToken();
 
     res.send({ user, token });
@@ -62,13 +61,13 @@ exports.user_logoutAll = async (req, res) => {
 // Update User
 exports.user_update = async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["name", "email", "password"];
+  const allowedUpdates = ['name', 'email', 'password'];
   const isValidOperation = updates.every((update) => {
     return allowedUpdates.includes(update);
   });
 
   if (!isValidOperation) {
-    return res.status(400).send({ error: "Invalid updates!" });
+    return res.status(400).send({ error: 'Invalid updates!' });
   }
 
   try {
@@ -98,16 +97,16 @@ exports.user_totalComments = async (req, res) => {
     const comments = await User.aggregate([
       {
         $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "autor",
-          as: "userComments",
+          from: 'comments',
+          localField: '_id',
+          foreignField: 'autor',
+          as: 'userComments',
         },
       },
-      { $unwind: "$userComments" },
+      { $unwind: '$userComments' },
       {
         $group: {
-          _id: "$name",
+          _id: '$name',
           numOfComments: { $sum: 1 },
         },
       },

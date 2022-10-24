@@ -1,17 +1,18 @@
-const Post = require("../posts/postModel");
+const Post = require('../posts/postModel');
 
 // Create a new Post
 exports.post_create = async (req, res) => {
   if (!req.body.title || !req.body.body) {
-    return res.status(400).send({ message: "Title and body Required!" });
+    return res.status(400).send({ message: 'Title and body Required!' });
   }
-  const post = new Post({
-    title: req.body.title,
-    body: req.body.body,
-    autor: req.user._id,
-    autorName: req.user.name,
-  });
   try {
+    const post = new Post({
+      title: req.body.title,
+      body: req.body.body,
+      autor: req.user._id,
+      autorName: req.user.name,
+    });
+
     await post.save();
     res.status(201).send(post);
   } catch (e) {
@@ -49,13 +50,13 @@ exports.post_GetPostById = async (req, res) => {
 // Update Post
 exports.post_update = async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["title", "body"];
+  const allowedUpdates = ['title', 'body'];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
 
   if (!isValidOperation) {
-    return res.status(400).send({ error: "Invalid updates!" });
+    return res.status(400).send({ error: 'Invalid updates!' });
   }
 
   try {
@@ -81,67 +82,67 @@ exports.post_postsCommentReplies = async (req, res) => {
     const posts = await Post.aggregate([
       {
         $lookup: {
-          from: "comments",
-          let: { post_Id: "$_id" },
+          from: 'comments',
+          let: { post_Id: '$_id' },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$$post_Id", "$postId"] },
-                    { $eq: ["$parentId", null] },
+                    { $eq: ['$$post_Id', '$postId'] },
+                    { $eq: ['$parentId', null] },
                   ],
                 },
               },
             },
           ],
-          as: "comments",
+          as: 'comments',
         },
       },
       {
         $unwind: {
-          path: "$comments",
+          path: '$comments',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $lookup: {
-          from: "comments",
-          localField: "comments._id",
-          foreignField: "parentId",
-          as: "reply",
+          from: 'comments',
+          localField: 'comments._id',
+          foreignField: 'parentId',
+          as: 'reply',
         },
       },
 
       {
         $unwind: {
-          path: "$reply",
+          path: '$reply',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $group: {
           _id: {
-            _id: "$_id",
-            title: "$title",
-            body: "$body",
-            autor: "$autor",
-            autorName: "$autorName",
-            createdAt: "$createdAt",
-            updatedAt: "$updatedAt",
+            _id: '$_id',
+            title: '$title',
+            body: '$body',
+            autor: '$autor',
+            autorName: '$autorName',
+            createdAt: '$createdAt',
+            updatedAt: '$updatedAt',
             comments: {
-              _id: "$comments._id",
-              comment: "$comments.comment",
-              autor: "$comments.autor",
-              autorName: "$comments.autorName",
-              postId: "$comments.postId",
-              createdAt: "$comments.createdAt",
-              updatedAt: "$comments.updatedAt",
+              _id: '$comments._id',
+              comment: '$comments.comment',
+              autor: '$comments.autor',
+              autorName: '$comments.autorName',
+              postId: '$comments.postId',
+              createdAt: '$comments.createdAt',
+              updatedAt: '$comments.updatedAt',
             },
           },
           replies: {
             $push: {
-              $cond: [{ $gt: ["$reply", 0] }, "$reply", "$$REMOVE"],
+              $cond: [{ $gt: ['$reply', 0] }, '$reply', '$$REMOVE'],
             },
           },
           replyCount: { $sum: 1 },
@@ -150,31 +151,31 @@ exports.post_postsCommentReplies = async (req, res) => {
       { $sort: { replyCount: -1 } },
       {
         $group: {
-          _id: "$_id._id",
-          title: { $first: "$_id.title" },
-          body: { $first: "$_id.body" },
-          autor: { $first: "$_id.autor" },
-          autorName: { $first: "$_id.autorName" },
-          createdAt: { $first: "$_id.createdAt" },
-          updatedAt: { $first: "$_id.updatedAt" },
+          _id: '$_id._id',
+          title: { $first: '$_id.title' },
+          body: { $first: '$_id.body' },
+          autor: { $first: '$_id.autor' },
+          autorName: { $first: '$_id.autorName' },
+          createdAt: { $first: '$_id.createdAt' },
+          updatedAt: { $first: '$_id.updatedAt' },
           commentCount: { $sum: 1 },
           comments: {
             $push: {
-              _id: "$_id.comments._id",
-              comment: "$_id.comments.comment",
-              autor: "$_id.comments.autor",
-              autorName: "$_id.comments.autorName",
-              postId: "$_id.comments.postId",
-              createdAt: "$_id.comments.createdAt",
-              updatedAt: "$_id.comments.updatedAt",
+              _id: '$_id.comments._id',
+              comment: '$_id.comments.comment',
+              autor: '$_id.comments.autor',
+              autorName: '$_id.comments.autorName',
+              postId: '$_id.comments.postId',
+              createdAt: '$_id.comments.createdAt',
+              updatedAt: '$_id.comments.updatedAt',
               replyCount: {
                 $cond: {
-                  if: { $isArray: "$replies" },
-                  then: { $size: "$replies" },
+                  if: { $isArray: '$replies' },
+                  then: { $size: '$replies' },
                   else: 0,
                 },
               },
-              reply: "$replies",
+              reply: '$replies',
             },
           },
         },
@@ -210,92 +211,92 @@ exports.post_totalComments10 = async (req, res) => {
     const posts = await Post.aggregate([
       {
         $lookup: {
-          from: "comments",
-          let: { post_Id: "$_id" },
+          from: 'comments',
+          let: { post_Id: '$_id' },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$$post_Id", "$postId"] },
-                    { $eq: ["$parentId", null] },
+                    { $eq: ['$$post_Id', '$postId'] },
+                    { $eq: ['$parentId', null] },
                   ],
                 },
               },
             },
           ],
-          as: "comments",
+          as: 'comments',
         },
       },
       {
         $unwind: {
-          path: "$comments",
+          path: '$comments',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $lookup: {
-          from: "comments",
-          localField: "comments._id",
-          foreignField: "parentId",
-          as: "reply",
+          from: 'comments',
+          localField: 'comments._id',
+          foreignField: 'parentId',
+          as: 'reply',
         },
       },
       {
         $unwind: {
-          path: "$reply",
+          path: '$reply',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $group: {
           _id: {
-            _id: "$_id",
-            title: "$title",
-            body: "$body",
-            autor: "$autor",
-            createdAt: "$createdAt",
-            updatedAt: "$updatedAt",
+            _id: '$_id',
+            title: '$title',
+            body: '$body',
+            autor: '$autor',
+            createdAt: '$createdAt',
+            updatedAt: '$updatedAt',
             comments: {
-              _id: "$comments._id",
-              comment: "$comments.comment",
-              autor: "$comments.autor",
-              postId: "$comments.postId",
-              createdAt: "$comments.createdAt",
-              updatedAt: "$comments.updatedAt",
+              _id: '$comments._id',
+              comment: '$comments.comment',
+              autor: '$comments.autor',
+              postId: '$comments.postId',
+              createdAt: '$comments.createdAt',
+              updatedAt: '$comments.updatedAt',
             },
           },
           // replyCount: { $sum: 1 },
-          replies: { $push: "$reply" },
+          replies: { $push: '$reply' },
         },
       },
       { $sort: { replyCount: -1 } },
       {
         $group: {
-          _id: "$_id._id",
-          title: { $first: "$_id.title" },
-          body: { $first: "$_id.body" },
-          autor: { $first: "$_id.autor" },
-          createdAt: { $first: "$_id.createdAt" },
-          updatedAt: { $first: "$_id.updatedAt" },
+          _id: '$_id._id',
+          title: { $first: '$_id.title' },
+          body: { $first: '$_id.body' },
+          autor: { $first: '$_id.autor' },
+          createdAt: { $first: '$_id.createdAt' },
+          updatedAt: { $first: '$_id.updatedAt' },
           commentCount: { $sum: 1 },
-          totalRep: { $sum: "$replyCount" },
+          totalRep: { $sum: '$replyCount' },
           comments: {
             $push: {
-              _id: "$_id.comments._id",
-              comment: "$_id.comments.comment",
-              autor: "$_id.comments.autor",
-              postId: "$_id.comments.postId",
-              createdAt: "$_id.comments.createdAt",
-              updatedAt: "$_id.comments.updatedAt",
+              _id: '$_id.comments._id',
+              comment: '$_id.comments.comment',
+              autor: '$_id.comments.autor',
+              postId: '$_id.comments.postId',
+              createdAt: '$_id.comments.createdAt',
+              updatedAt: '$_id.comments.updatedAt',
               replyCount: {
                 $cond: {
-                  if: { $isArray: "$replies" },
-                  then: { $size: "$replies" },
+                  if: { $isArray: '$replies' },
+                  then: { $size: '$replies' },
                   else: 0,
                 },
               },
-              reply: "$replies",
+              reply: '$replies',
             },
           },
         },
